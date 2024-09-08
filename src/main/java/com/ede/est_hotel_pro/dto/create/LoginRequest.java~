@@ -1,0 +1,2 @@
+package com.ede.est_hotel_pro.entity.account;public record LoginRequest() {
+}
