@@ -35,7 +35,7 @@ public class AccountService {
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Account with name '%s' not found", name)));
     }
 
-    public AccountEntity getAccountById(UUID accountId) {
+    public AccountEntity findAccountById(UUID accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Account with id '%s' not found", accountId)));
     }
@@ -83,9 +83,8 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    public void deleteAccount(UUID accountId) {
-        AccountEntity account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Account with id '%s' not found", accountId)));
+    public void deleteAccountById(UUID accountId) {
+        AccountEntity account = findAccountById(accountId);
 
         accountRepository.delete(account);
     }

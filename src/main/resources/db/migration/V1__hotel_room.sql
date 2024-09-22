@@ -6,6 +6,6 @@ create table if not exists hotel_room
     number_room int          not null
         constraint uk_number_room unique,
     price       int          not null,
-    state       varchar(255) not null,
+    state       varchar(255),
     available   boolean      not null DEFAULT TRUE
 );

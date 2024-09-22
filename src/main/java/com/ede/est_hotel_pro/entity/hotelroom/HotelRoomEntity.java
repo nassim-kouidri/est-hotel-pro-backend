@@ -1,24 +1,29 @@
 package com.ede.est_hotel_pro.entity.hotelroom;
 
 import com.ede.est_hotel_pro.entity.BaseEntity;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "hotel_room")
 @Getter
 @Setter
-@RequiredArgsConstructor
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class HotelRoomEntity extends BaseEntity {
 
     @Column(nullable = false, unique = true)
-    private int numberRoom;
+    private int roomNumber;
 
     @Column(nullable = false)
     private int price;
@@ -27,7 +32,7 @@ public class HotelRoomEntity extends BaseEntity {
     @Column(nullable = false)
     private CategoryRoom category;
 
-    @Column(nullable = false)
+    @Nullable
     private String state;
 
     @Column(nullable = false)
