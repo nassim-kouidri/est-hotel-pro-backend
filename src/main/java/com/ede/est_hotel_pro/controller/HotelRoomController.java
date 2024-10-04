@@ -37,7 +37,7 @@ public class HotelRoomController {
         return rooms.stream().map(HotelRoomResponse::toDto).toList();
     }
 
-    @GetMapping("/{category}")
+    @GetMapping("/category/{category}")
     public List<HotelRoomResponse> getAllRoomsByCategory(@PathVariable CategoryRoom category) {
         List<HotelRoomEntity> rooms = hotelRoomService.findAllRoomsByCategory(category);
         return rooms.stream().map(HotelRoomResponse::toDto).toList();
@@ -49,7 +49,7 @@ public class HotelRoomController {
         return HotelRoomResponse.toDto(room);
     }
 
-    @GetMapping("/{roomNumber}")
+    @GetMapping("/roomNumber/{roomNumber}")
     public HotelRoomResponse getRoomById(@PathVariable int roomNumber) {
         HotelRoomEntity room = hotelRoomService.findByRoomNumber(roomNumber);
         return HotelRoomResponse.toDto(room);

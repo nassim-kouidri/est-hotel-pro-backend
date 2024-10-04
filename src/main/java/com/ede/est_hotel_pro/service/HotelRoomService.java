@@ -40,6 +40,7 @@ public class HotelRoomService {
     }
 
     public HotelRoomEntity save(CreateRoomRequest roomRequest) {
+        checkCreateRoom(roomRequest);
         HotelRoomEntity hotelRoomEntity = new HotelRoomEntity().toBuilder()
                 .roomNumber(roomRequest.roomNumber())
                 .price(roomRequest.price())
@@ -50,8 +51,27 @@ public class HotelRoomService {
         return hotelRoomRepository.save(hotelRoomEntity);
     }
 
+    public HotelRoomEntity update(HotelRoomEntity hotelRoomEntity) {
+        HotelRoomEntity existingRoom = findById(hotelRoomEntity.getId());
+        existingRoom = HotelRoomEntity.builder()
+                //TODO : to continue
+                .build();
+
+        return existingRoom;
+    }
+
     public void deleteHotelRoomById(UUID id) {
         HotelRoomEntity roomEntity = findById(id);
         hotelRoomRepository.delete(roomEntity);
+    }
+
+    private void checkCreateRoom(CreateRoomRequest roomRequest) {
+        if (hotelRoomRepository.findByRoomNumber(roomRequest.roomNumber()).isPresent()) {
+            throw new IllegalArgumentException(String.format("Room number '%s' already exists", roomRequest.roomNumber()));
+        }
+
+        if (roomRequest.price() < 0) {
+            throw new IllegalArgumentException(String.format("Room price '%s' is invalid", roomRequest.price()));
+        }
     }
 }

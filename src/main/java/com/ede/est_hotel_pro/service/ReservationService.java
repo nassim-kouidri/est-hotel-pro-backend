@@ -1,6 +1,7 @@
 package com.ede.est_hotel_pro.service;
 
 import com.ede.est_hotel_pro.dto.create.CreateReservationRequest;
+import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.UUID;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final HotelRoomService hotelRoomService;
 
     public List<ReservationEntity> findAll() {
         return reservationRepository.findAll();
@@ -26,9 +28,11 @@ public class ReservationService {
     }
 
     public ReservationEntity save(CreateReservationRequest request) {
+        HotelRoomEntity roomEntity = hotelRoomService.findById(request.roomId());
         ReservationEntity reservation = new ReservationEntity().toBuilder()
                 .startDate(request.startDate())
                 .endDate(request.endDate())
+                .hotelRoom(roomEntity)
                 .userReservation(request.userSnapshot())
                 .pricePaid(request.pricePaid())
                 .numberOfChildren(request.numberOfChildren())

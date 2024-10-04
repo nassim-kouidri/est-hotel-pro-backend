@@ -38,7 +38,13 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1/accounts/login", "/v1/accounts/encodePassword").permitAll()
+                        .requestMatchers(
+                                "/v1/accounts/login",
+                                "/v1/accounts/encodePassword",
+                                "swagger-ui/*",
+                                "/api-docs/**"
+                        )
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -48,27 +54,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(AbstractHttpConfigurer::disable)
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/v1/accounts/login").permitAll()
-//                        .requestMatchers("/v1/accounts/create").hasRole(Role.ADMIN.name())
-//                        .requestMatchers("/v1/accounts/update/*").hasRole(Role.ADMIN.name())
-//                        .requestMatchers("/v1/accounts/delete/*").hasRole(Role.ADMIN.name())
-//                        .requestMatchers("/v1/hotel-rooms/delete/*").hasRole(Role.ADMIN.name())
-//                        .requestMatchers("/v1/accounts/encodePassword").permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .sessionManagement(session -> session
-//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                )
-//                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
 
     @Bean
     public CorsFilter corsFilter() {
@@ -86,5 +71,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }

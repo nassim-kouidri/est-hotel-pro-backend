@@ -9,6 +9,7 @@ import java.util.UUID;
 public record ReservationResponse(
         UUID id,
         UserSnapshot userSnapshot,
+        HotelRoomResponse hotelRoom,
         Instant startDate,
         Instant endDate,
         String claim,
@@ -21,6 +22,7 @@ public record ReservationResponse(
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getUserReservation(),
+                HotelRoomResponse.toDto(reservation.getHotelRoom()),
                 reservation.getStartDate(),
                 reservation.getEndDate(),
                 reservation.getClaim(),

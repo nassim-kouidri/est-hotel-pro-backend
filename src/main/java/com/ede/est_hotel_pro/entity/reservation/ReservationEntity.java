@@ -1,8 +1,10 @@
 package com.ede.est_hotel_pro.entity.reservation;
 
 import com.ede.est_hotel_pro.entity.BaseEntity;
+import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,12 +27,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ReservationEntity extends BaseEntity {
 
-    @Column(nullable = false)
-    private UUID idRoom;
-
     @Column
     @Type(JsonBinaryType.class)
     private UserSnapshot userReservation;
+
+    @ManyToOne(optional = false)
+    private HotelRoomEntity hotelRoom;
 
     @Column(nullable = false)
     private Instant startDate;

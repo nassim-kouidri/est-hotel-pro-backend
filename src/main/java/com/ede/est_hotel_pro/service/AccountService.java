@@ -27,7 +27,7 @@ public class AccountService {
     private static final String PHONE_NUMBER_REGEX = "^0[0-9]{9}$";
 
     public List<AccountEntity> getAccounts() {
-        return accountRepository.findAll();
+        return accountRepository.findAll().stream().filter(accountEntity -> accountEntity.getRole().equals(STAFF)).toList();
     }
 
     public AccountEntity findAccountByName(String name) {

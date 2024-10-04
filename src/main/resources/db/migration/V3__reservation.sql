@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS reservation
 (
     id                 UUID      NOT NULL
         constraint pk_reservation primary key,
-    id_room            UUID      NOT NULL,
+    hotel_room_id            UUID      NOT NULL,
     user_reservation   JSONB     NOT NULL,
     start_date         TIMESTAMP NOT NULL,
     end_date           TIMESTAMP NOT NULL,
@@ -11,5 +11,5 @@ CREATE TABLE IF NOT EXISTS reservation
     price_paid         INT       NOT NULL,
     claim              VARCHAR(255),
     review             BIGINT,
-    CONSTRAINT fk_room FOREIGN KEY (id_room) REFERENCES hotel_room (id)
+    CONSTRAINT fk_room FOREIGN KEY (hotel_room_id) REFERENCES hotel_room (id)
 );
