@@ -21,7 +21,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AccountEntity extends BaseEntity {
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Column(nullable = false)

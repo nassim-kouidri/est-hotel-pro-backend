@@ -6,5 +6,6 @@ public record CreateRoomRequest(
         int roomNumber,
         int price,
         CategoryRoom category,
-        String state) {
+        String state,
+        String imageUrl) {
 }

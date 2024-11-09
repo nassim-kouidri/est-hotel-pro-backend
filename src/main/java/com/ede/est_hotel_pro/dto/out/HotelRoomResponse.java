@@ -10,7 +10,9 @@ public record HotelRoomResponse(
         int roomNumber,
         int price,
         CategoryRoom category,
-        String state) {
+        String state,
+        boolean available,
+        String imageUrl) {
 
     public static HotelRoomResponse toDto(HotelRoomEntity roomEntity) {
         return new HotelRoomResponse(
@@ -18,7 +20,9 @@ public record HotelRoomResponse(
                 roomEntity.getRoomNumber(),
                 roomEntity.getPrice(),
                 roomEntity.getCategory(),
-                roomEntity.getState()
+                roomEntity.getState(),
+                roomEntity.isAvailable(),
+                roomEntity.getImageUrl()
         );
     }
 }

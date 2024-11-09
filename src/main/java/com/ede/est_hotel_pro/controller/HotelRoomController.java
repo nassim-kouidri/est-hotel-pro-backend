@@ -50,7 +50,7 @@ public class HotelRoomController {
     }
 
     @GetMapping("/roomNumber/{roomNumber}")
-    public HotelRoomResponse getRoomById(@PathVariable int roomNumber) {
+    public HotelRoomResponse getRoomByRoomNumber(@PathVariable int roomNumber) {
         HotelRoomEntity room = hotelRoomService.findByRoomNumber(roomNumber);
         return HotelRoomResponse.toDto(room);
     }

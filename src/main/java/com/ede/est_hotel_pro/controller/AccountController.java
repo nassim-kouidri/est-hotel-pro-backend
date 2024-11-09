@@ -54,8 +54,7 @@ public class AccountController {
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest loginRequest) {
-        String token = accountService.login(loginRequest);
-        return new LoginResponse(token, loginRequest.name(), loginRequest.password());
+        return accountService.login(loginRequest);
     }
 
     @PutMapping("/{id}")

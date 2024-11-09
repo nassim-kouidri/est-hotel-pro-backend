@@ -3,6 +3,8 @@ package com.ede.est_hotel_pro.service;
 import com.ede.est_hotel_pro.configuration.JwtTokenUtil;
 import com.ede.est_hotel_pro.dto.create.CreateAccountRequest;
 import com.ede.est_hotel_pro.dto.create.LoginRequest;
+import com.ede.est_hotel_pro.dto.out.AccountResponse;
+import com.ede.est_hotel_pro.dto.out.LoginResponse;
 import com.ede.est_hotel_pro.entity.account.AccountEntity;
 import com.ede.est_hotel_pro.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +43,7 @@ public class AccountService {
     }
 
     public AccountEntity createAccount(CreateAccountRequest createAccount) {
-        checkCreateAccount(createAccount);
+        checkCreateAndUpdateAccount(createAccount);
         AccountEntity accountEntity = new AccountEntity().toBuilder()
                 .name(createAccount.name())
                 .firstName(createAccount.firstName())
@@ -53,43 +55,35 @@ public class AccountService {
         return accountRepository.save(accountEntity);
     }
 
-    public String login(LoginRequest loginRequest) {
+    public LoginResponse login(LoginRequest loginRequest) {
         AccountEntity account = findAccountByName(loginRequest.name());
         if (passwordEncoder.matches(loginRequest.password(), account.getPassword())) {
-            return jwtTokenUtil.generateToken(account.getName());
+            String token = jwtTokenUtil.generateToken(account.getName());
+            return new LoginResponse(token, AccountResponse.toDto(account));
         } else {
-            throw new IllegalArgumentException("Phone number or password is incorrect");
+            throw new IllegalArgumentException("name or password is incorrect");
         }
     }
 
     public AccountEntity updateAccount(UUID accountId, CreateAccountRequest updatedAccount) {
         AccountEntity account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Account with id '%s' not found", accountId)));
-
-        if (!isPasswordValid(updatedAccount.password())) {
-            throw new IllegalArgumentException("Password does not meet the required criteria");
-        }
-
-        if (!isPhoneNumberValid(updatedAccount.phoneNumber())) {
-            throw new IllegalArgumentException("Phone number must have 10 digits and start with 0");
-        }
+        checkCreateAndUpdateAccount(updatedAccount);
 
         account.setName(updatedAccount.name());
         account.setFirstName(updatedAccount.firstName());
         account.setPhoneNumber(updatedAccount.phoneNumber());
         account.setPassword(passwordEncoder.encode(updatedAccount.password()));
-        account.setRole(updatedAccount.role());
 
         return accountRepository.save(account);
     }
 
     public void deleteAccountById(UUID accountId) {
         AccountEntity account = findAccountById(accountId);
-
         accountRepository.delete(account);
     }
 
-    private void checkCreateAccount(CreateAccountRequest createAccount) {
+    private void checkCreateAndUpdateAccount(CreateAccountRequest createAccount) {
         if (!isPasswordValid(createAccount.password())) {
             throw new IllegalArgumentException("Password does not meet the required criteria");
         }
@@ -98,12 +92,12 @@ public class AccountService {
             throw new IllegalArgumentException("Phone number must have 10 digits and start with 0");
         }
 
-        if (accountRepository.findByPhoneNumber(createAccount.phoneNumber()).isPresent()) {
+        if (accountRepository.existsByPhoneNumber(createAccount.phoneNumber())) {
             throw new IllegalArgumentException("Phone number already in use");
         }
 
-        if (accountRepository.findByName(createAccount.name()).isPresent()) {
-            throw new IllegalArgumentException("Account name already in use");
+        if (accountRepository.existsByName(createAccount.name())) {
+            throw new IllegalArgumentException("Account already exist");
         }
     }
 

@@ -37,4 +37,8 @@ public class HotelRoomEntity extends BaseEntity {
 
     @Column(nullable = false)
     private boolean available = true;
+
+    @Column
+    private String imageUrl;
+
 }
