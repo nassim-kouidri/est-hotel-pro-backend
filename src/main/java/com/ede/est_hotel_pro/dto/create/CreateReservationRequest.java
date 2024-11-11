@@ -7,13 +7,12 @@ import java.util.UUID;
 
 public record CreateReservationRequest(
         UserSnapshot userSnapshot,
-        Instant startDate,
         UUID roomId,
+        Instant startDate,
         Instant endDate,
         String claim,
         int numberOfChildren,
         int numberOfAdults,
         int pricePaid,
-        long review
-) {
+        long review) {
 }

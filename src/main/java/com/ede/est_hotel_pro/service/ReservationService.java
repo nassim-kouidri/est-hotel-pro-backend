@@ -32,12 +32,13 @@ public class ReservationService {
 
     @Transactional
     public ReservationEntity save(CreateReservationRequest request) {
+        checkCreateReservation(request);
         HotelRoomEntity roomEntity = hotelRoomService.findById(request.roomId());
         if (!roomEntity.isAvailable()) {
             throw new IllegalArgumentException("The room is not available for reservation.");
         }
         roomEntity.setAvailable(false);
-        hotelRoomService.update(roomEntity);
+        hotelRoomService.updateAvailability(roomEntity);
 
         ReservationEntity reservation = new ReservationEntity().toBuilder()
                 .startDate(request.startDate())
@@ -62,7 +63,13 @@ public class ReservationService {
         reservationRepository.delete(reservation);
 
         roomEntity.setAvailable(true);
-        hotelRoomService.update(roomEntity);
+        hotelRoomService.updateAvailability(roomEntity);
+    }
+
+    private void checkCreateReservation(CreateReservationRequest request) {
+        if (request.endDate().isBefore(request.startDate())) {
+            throw new IllegalArgumentException("The end date must be after the start date.");
+        }
     }
 
     @Scheduled(cron = "0 0 10 * * *") // every day at 10am
@@ -75,7 +82,7 @@ public class ReservationService {
 
             if (!room.isAvailable()) {
                 room.setAvailable(true);
-                hotelRoomService.update(room);
+                hotelRoomService.updateAvailability(room);
             }
         }
     }

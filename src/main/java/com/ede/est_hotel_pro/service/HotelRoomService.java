@@ -43,7 +43,7 @@ public class HotelRoomService {
 
     @Transactional
     public HotelRoomEntity save(CreateRoomRequest roomRequest) {
-        checkCreateRoom(roomRequest);
+        checkCreateAndUpdateRoom(roomRequest);
         HotelRoomEntity hotelRoomEntity = new HotelRoomEntity().toBuilder()
                 .roomNumber(roomRequest.roomNumber())
                 .price(roomRequest.price())
@@ -55,24 +55,38 @@ public class HotelRoomService {
         return hotelRoomRepository.save(hotelRoomEntity);
     }
 
-    public void update(HotelRoomEntity roomEntity) {
+    @Transactional
+    public HotelRoomEntity update(UUID id, CreateRoomRequest roomRequest) {
+        checkCreateAndUpdateRoom(roomRequest);
+        HotelRoomEntity existingRoom = findById(id);
+        existingRoom.setPrice(roomRequest.price());
+        existingRoom.setState(roomRequest.state());
+        existingRoom.setImageUrl(roomRequest.imageUrl());
+        return hotelRoomRepository.save(existingRoom);
+    }
+
+    @Transactional
+    public void updateAvailability(HotelRoomEntity roomEntity) {
         HotelRoomEntity existingRoom = findById(roomEntity.getId());
         existingRoom.setAvailable(roomEntity.isAvailable());
         hotelRoomRepository.save(existingRoom);
     }
 
+    @Transactional
     public void deleteHotelRoomById(UUID id) {
         HotelRoomEntity roomEntity = findById(id);
+        if (!roomEntity.getReservations().isEmpty()) {
+            throw new IllegalStateException(String.format("Cannot delete room with id '%s' because it has existing reservations", id));
+        }
         hotelRoomRepository.delete(roomEntity);
     }
 
-    private void checkCreateRoom(CreateRoomRequest roomRequest) {
-        if (hotelRoomRepository.findByRoomNumber(roomRequest.roomNumber()).isPresent()) {
-            throw new IllegalArgumentException(String.format("Room number '%s' already exists", roomRequest.roomNumber()));
-        }
-
+    private void checkCreateAndUpdateRoom(CreateRoomRequest roomRequest) {
         if (roomRequest.price() < 0) {
             throw new IllegalArgumentException(String.format("Room price '%s' is invalid", roomRequest.price()));
+        }
+        if (hotelRoomRepository.findByRoomNumber(roomRequest.roomNumber()).isPresent()) {
+            throw new IllegalArgumentException(String.format("Room number '%s' already exists", roomRequest.roomNumber()));
         }
     }
 

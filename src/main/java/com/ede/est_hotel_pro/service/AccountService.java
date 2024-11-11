@@ -7,6 +7,7 @@ import com.ede.est_hotel_pro.dto.out.AccountResponse;
 import com.ede.est_hotel_pro.dto.out.LoginResponse;
 import com.ede.est_hotel_pro.entity.account.AccountEntity;
 import com.ede.est_hotel_pro.repository.AccountRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class AccountService {
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Account with id '%s' not found", accountId)));
     }
 
+    @Transactional
     public AccountEntity createAccount(CreateAccountRequest createAccount) {
         checkCreateAndUpdateAccount(createAccount);
         AccountEntity accountEntity = new AccountEntity().toBuilder()
@@ -65,6 +67,7 @@ public class AccountService {
         }
     }
 
+    @Transactional
     public AccountEntity updateAccount(UUID accountId, CreateAccountRequest updatedAccount) {
         AccountEntity account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Account with id '%s' not found", accountId)));
@@ -97,7 +100,7 @@ public class AccountService {
         }
 
         if (accountRepository.existsByName(createAccount.name())) {
-            throw new IllegalArgumentException("Account already exist");
+            throw new IllegalArgumentException("Account name already exist");
         }
     }
 

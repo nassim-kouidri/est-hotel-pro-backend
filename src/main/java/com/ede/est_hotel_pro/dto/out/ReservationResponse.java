@@ -22,7 +22,22 @@ public record ReservationResponse(
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getUserReservation(),
-                HotelRoomResponse.toDto(reservation.getHotelRoom()),
+                HotelRoomResponse.toDtoWithoutReservations(reservation.getHotelRoom()),
+                reservation.getStartDate(),
+                reservation.getEndDate(),
+                reservation.getClaim(),
+                reservation.getNumberOfChildren(),
+                reservation.getNumberOfAdults(),
+                reservation.getPricePaid(),
+                reservation.getReview()
+        );
+    }
+
+    public static ReservationResponse toDtoWithoutRoom(ReservationEntity reservation) {
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getUserReservation(),
+                null,
                 reservation.getStartDate(),
                 reservation.getEndDate(),
                 reservation.getClaim(),

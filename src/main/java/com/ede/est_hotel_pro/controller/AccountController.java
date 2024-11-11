@@ -75,4 +75,10 @@ public class AccountController {
     public String encodePassword(@RequestBody String password) {
         return accountService.encodePassword(password);
     }
+
+    @GetMapping("/testApi")
+    @Operation(summary = "test api prod", hidden = true)
+    public String helloWorld() {
+        return "Hello World from EST Hotel Pro ;)";
+    }
 }

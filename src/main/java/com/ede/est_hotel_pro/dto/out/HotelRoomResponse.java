@@ -3,6 +3,7 @@ package com.ede.est_hotel_pro.dto.out;
 import com.ede.est_hotel_pro.entity.hotelroom.CategoryRoom;
 import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 public record HotelRoomResponse(
@@ -12,9 +13,11 @@ public record HotelRoomResponse(
         CategoryRoom category,
         String state,
         boolean available,
-        String imageUrl) {
+        String imageUrl,
+        List<ReservationResponse> reservations) {
 
     public static HotelRoomResponse toDto(HotelRoomEntity roomEntity) {
+        List<ReservationResponse> reservationResponses = roomEntity.getReservations().stream().map(ReservationResponse::toDtoWithoutRoom).toList();
         return new HotelRoomResponse(
                 roomEntity.getId(),
                 roomEntity.getRoomNumber(),
@@ -22,7 +25,21 @@ public record HotelRoomResponse(
                 roomEntity.getCategory(),
                 roomEntity.getState(),
                 roomEntity.isAvailable(),
-                roomEntity.getImageUrl()
+                roomEntity.getImageUrl(),
+                reservationResponses
+        );
+    }
+
+    public static HotelRoomResponse toDtoWithoutReservations(HotelRoomEntity roomEntity) {
+        return new HotelRoomResponse(
+                roomEntity.getId(),
+                roomEntity.getRoomNumber(),
+                roomEntity.getPrice(),
+                roomEntity.getCategory(),
+                roomEntity.getState(),
+                roomEntity.isAvailable(),
+                roomEntity.getImageUrl(),
+                null
         );
     }
 }
