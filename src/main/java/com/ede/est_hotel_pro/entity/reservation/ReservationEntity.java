@@ -4,6 +4,8 @@ import com.ede.est_hotel_pro.entity.BaseEntity;
 import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -16,7 +18,6 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "reservation")
@@ -46,10 +47,19 @@ public class ReservationEntity extends BaseEntity {
     @Column(nullable = false)
     private int numberOfAdults;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReservationStatus status;
+
     @Column(nullable = false)
     private int pricePaid;
 
+    @Column
     private String claim;
 
+    @Column
     private long review;
+
+    @Column(nullable = false)
+    private boolean completed;
 }

@@ -1,6 +1,7 @@
 package com.ede.est_hotel_pro.dto.out;
 
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
+import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
 import com.ede.est_hotel_pro.entity.reservation.UserSnapshot;
 
 import java.time.Instant;
@@ -16,7 +17,8 @@ public record ReservationResponse(
         int numberOfChildren,
         int numberOfAdults,
         int pricePaid,
-        long review
+        long review,
+        ReservationStatus status
 ) {
     public static ReservationResponse toDto(ReservationEntity reservation) {
         return new ReservationResponse(
@@ -29,7 +31,8 @@ public record ReservationResponse(
                 reservation.getNumberOfChildren(),
                 reservation.getNumberOfAdults(),
                 reservation.getPricePaid(),
-                reservation.getReview()
+                reservation.getReview(),
+                reservation.getStatus()
         );
     }
 
@@ -44,7 +47,8 @@ public record ReservationResponse(
                 reservation.getNumberOfChildren(),
                 reservation.getNumberOfAdults(),
                 reservation.getPricePaid(),
-                reservation.getReview()
+                reservation.getReview(),
+                reservation.getStatus()
         );
     }
 }

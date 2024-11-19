@@ -78,7 +78,7 @@ public class AccountController {
 
     @GetMapping("/testApi")
     @Operation(summary = "test api prod", hidden = true)
-    public String helloWorld() {
+    public String helloWorld(){
         return "Hello World from EST Hotel Pro ;)";
     }
 }

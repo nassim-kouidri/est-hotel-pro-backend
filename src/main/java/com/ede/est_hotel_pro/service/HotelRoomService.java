@@ -6,6 +6,7 @@ import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 import com.ede.est_hotel_pro.repository.HotelRoomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,6 +45,9 @@ public class HotelRoomService {
     @Transactional
     public HotelRoomEntity save(CreateRoomRequest roomRequest) {
         checkCreateAndUpdateRoom(roomRequest);
+        if (hotelRoomRepository.findByRoomNumber(roomRequest.roomNumber()).isPresent()) {
+            throw new IllegalArgumentException(String.format("Room number '%s' already exists", roomRequest.roomNumber()));
+        }
         HotelRoomEntity hotelRoomEntity = new HotelRoomEntity().toBuilder()
                 .roomNumber(roomRequest.roomNumber())
                 .price(roomRequest.price())
@@ -85,12 +89,9 @@ public class HotelRoomService {
         if (roomRequest.price() < 0) {
             throw new IllegalArgumentException(String.format("Room price '%s' is invalid", roomRequest.price()));
         }
-        if (hotelRoomRepository.findByRoomNumber(roomRequest.roomNumber()).isPresent()) {
-            throw new IllegalArgumentException(String.format("Room number '%s' already exists", roomRequest.roomNumber()));
-        }
     }
 
     private String getImageUrl(CreateRoomRequest roomRequest) {
-        return roomRequest.imageUrl() == null ? ULR_DEFAULT_IMAGE : roomRequest.imageUrl();
+        return StringUtils.isEmpty(roomRequest.imageUrl()) ? ULR_DEFAULT_IMAGE : roomRequest.imageUrl();
     }
 }
