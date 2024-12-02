@@ -8,7 +8,7 @@ WORKDIR /app
 COPY target/est-hotel-pro-0.0.1-SNAPSHOT.jar app.jar
 
 # Exposer le port sur lequel l'application fonctionne
-EXPOSE 8086
+EXPOSE 8085
 
 # Commande pour exécuter l'application
 ENTRYPOINT ["java", "-jar", "app.jar"]

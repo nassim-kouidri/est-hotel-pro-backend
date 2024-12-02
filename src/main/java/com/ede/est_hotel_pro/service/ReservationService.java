@@ -12,10 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static com.ede.est_hotel_pro.entity.reservation.ReservationStatus.ENDED;
-import static com.ede.est_hotel_pro.entity.reservation.ReservationStatus.IN_PROGRESS;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +29,20 @@ public class ReservationService {
 
     public List<ReservationEntity> findAllByStatus(ReservationStatus status) {
         return reservationRepository.findAllByStatus(status);
+    }
+
+    public List<ReservationEntity> findReservationsByFilter(ReservationStatus status, UUID hotelRoomId) {
+        List<ReservationEntity> reservations = reservationRepository.findAllByStatusFilter(status);
+        if (hotelRoomId != null) {
+            reservations = reservations.stream()
+                    .filter(reservation -> reservation.getHotelRoom().getId().equals(hotelRoomId))
+                    .toList();
+        }
+        return reservations;
+    }
+
+    public List<ReservationEntity> findAllReservations(Optional<ReservationStatus> status) {
+        return reservationRepository.findAllByStatusOrAll(status.orElse(null));
     }
 
     public ReservationEntity findById(UUID id) {
@@ -55,38 +68,35 @@ public class ReservationService {
                 .status(handleReservationStatus(request.startDate(), request.endDate()))
                 .build();
 
+        reservation.setCompleted(reservation.isReservationFinished());
+        if (reservation.isReservationInProgress() && roomEntity.isAvailable()) {
+            roomEntity.setAvailable(false);
+            hotelRoomService.updateAvailability(roomEntity);
+        }
+
         return reservationRepository.save(reservation);
     }
 
     @Transactional
     public ReservationEntity update(UUID id, CreateReservationRequest request) {
-        checkCreateAndUpdateReservation(request);
         ReservationEntity existingReservation = findById(id);
-        existingReservation.setEndDate(request.endDate());
-        existingReservation.setStartDate(request.startDate());
+
         existingReservation.setNumberOfChildren(request.numberOfChildren());
         existingReservation.setNumberOfAdults(request.numberOfAdults());
         existingReservation.setUserReservation(request.userSnapshot());
         existingReservation.setPricePaid(request.pricePaid());
         existingReservation.setClaim(request.claim());
         existingReservation.setReview(request.review());
-        existingReservation.setStatus(handleReservationStatus(request.startDate(), request.endDate()));
 
         return reservationRepository.save(existingReservation);
-    }
-
-    private void updateReservationToCompleted(ReservationEntity reservation) {
-        reservation.setCompleted(true);
-        reservationRepository.save(reservation);
     }
 
     @Transactional
     public void deleteById(UUID id) {
         ReservationEntity reservation = findById(id);
         HotelRoomEntity roomEntity = reservation.getHotelRoom();
-        ReservationStatus status = reservation.getStatus();
         reservationRepository.delete(reservation);
-        if (status == IN_PROGRESS && !roomEntity.isAvailable()) {
+        if (reservation.isReservationInProgress() && !roomEntity.isAvailable()) {
             roomEntity.setAvailable(true);
             hotelRoomService.updateAvailability(roomEntity);
         }
@@ -107,7 +117,7 @@ public class ReservationService {
         return overlappingReservations.isEmpty();
     }
 
-    public ReservationStatus handleReservationStatus(Instant startDate, Instant endDate) {
+    private ReservationStatus handleReservationStatus(Instant startDate, Instant endDate) {
         Instant now = Instant.now();
         if (startDate.isBefore(now) && endDate.isAfter(now)) {
             return ReservationStatus.IN_PROGRESS;
@@ -121,23 +131,29 @@ public class ReservationService {
         throw new IllegalStateException("Invalid reservation dates");
     }
 
-    @Scheduled(cron = "0 0 * * * *") // Every hour
+
+    //    @Scheduled(cron = "0 0 * * * *") // Every hour
+    @Scheduled(cron = "0 */2 * * * *") // Every 2 minutes
     @Transactional
-    public void updateRoomAvailabilityBasedOnReservations() {
+    protected void updateRoomAvailabilityBasedOnReservations() {
         List<ReservationEntity> reservationEntitiesToUpdate = reservationRepository.findAllByCompleted(false);
         for (ReservationEntity reservation : reservationEntitiesToUpdate) {
-            reservation.setStatus(handleReservationStatus(reservation.getStartDate(), reservation.getEndDate()));
-            HotelRoomEntity room = reservation.getHotelRoom();
-            if (reservation.getStatus().equals(IN_PROGRESS) && room.isAvailable()) {
-                room.setAvailable(false);
-                hotelRoomService.updateAvailability(room);
-            }
-            if (reservation.getStatus().equals(ENDED)) {
-                updateReservationToCompleted(reservation);
-                if (!room.isAvailable()) {
-                    room.setAvailable(true);
+            ReservationStatus newStatus = handleReservationStatus(reservation.getStartDate(), reservation.getEndDate());
+            if (reservation.getStatus() != newStatus) {
+                reservation.setStatus(handleReservationStatus(reservation.getStartDate(), reservation.getEndDate()));
+                HotelRoomEntity room = reservation.getHotelRoom();
+                if (reservation.isReservationInProgress() && room.isAvailable()) {
+                    room.setAvailable(false);
                     hotelRoomService.updateAvailability(room);
                 }
+                if (reservation.isReservationFinished()) {
+                    reservation.setCompleted(true);
+                    if (!room.isAvailable()) {
+                        room.setAvailable(true);
+                        hotelRoomService.updateAvailability(room);
+                    }
+                }
+                reservationRepository.save(reservation);
             }
         }
     }

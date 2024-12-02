@@ -3,6 +3,8 @@ package com.ede.est_hotel_pro.repository;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -23,4 +25,15 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
     List<ReservationEntity> findAllByStatusIn(List<ReservationStatus> status);
 
     List<ReservationEntity> findAllByCompleted(boolean completed);
+
+    @Query("SELECT r FROM ReservationEntity r WHERE :status IS NULL OR r.status = :status")
+    List<ReservationEntity> findAllByStatusOrAll(@Param("status") ReservationStatus status);
+
+    @Query("""
+            SELECT r 
+            FROM ReservationEntity r 
+            WHERE (:status IS NULL OR r.status = :status)
+            """)
+    List<ReservationEntity> findAllByStatusFilter(@Param("status") ReservationStatus status);
+
 }

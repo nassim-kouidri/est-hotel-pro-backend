@@ -16,11 +16,23 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class HotelRoomService {
 
-    private final String ULR_DEFAULT_IMAGE = "https://img.freepik.com/photos-gratuite/surface-abstraite-textures-mur-pierre-beton-blanc_74190-8189.jpg";
+    private final String ULR_DEFAULT_IMAGE = "https://www.shutterstock.com/image-vector/default-ui-image-placeholder-wireframes-600nw-1037719192.jpg";
     private final HotelRoomRepository hotelRoomRepository;
 
     public List<HotelRoomEntity> findAllRooms() {
         return hotelRoomRepository.findAll();
+    }
+
+    public List<HotelRoomEntity> findAllAvailableRooms() {
+        return findAllRooms().stream().filter(HotelRoomEntity::isAvailable).toList();
+    }
+
+    public List<HotelRoomEntity> findAllRoomsByCategory(CategoryRoom categoryRoom) {
+        return hotelRoomRepository.findAllByCategory(categoryRoom);
+    }
+
+    public List<HotelRoomEntity> findRoomsByFilters(CategoryRoom category, Boolean available) {
+        return hotelRoomRepository.findAllByCategoryAndAvailable(category, available);
     }
 
     public HotelRoomEntity findById(UUID id) {
@@ -32,14 +44,6 @@ public class HotelRoomService {
         return hotelRoomRepository.findByRoomNumber(roomNumber)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Hotel room with number '%s' not found", roomNumber)));
 
-    }
-
-    public List<HotelRoomEntity> findAllAvailableRooms() {
-        return findAllRooms().stream().filter(HotelRoomEntity::isAvailable).toList();
-    }
-
-    public List<HotelRoomEntity> findAllRoomsByCategory(CategoryRoom categoryRoom) {
-        return hotelRoomRepository.findAllByCategory(categoryRoom);
     }
 
     @Transactional

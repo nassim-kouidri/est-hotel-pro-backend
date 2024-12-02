@@ -62,4 +62,12 @@ public class ReservationEntity extends BaseEntity {
 
     @Column(nullable = false)
     private boolean completed;
+
+    public boolean isReservationFinished() {
+        return this.status == ReservationStatus.ENDED;
+    }
+
+    public boolean isReservationInProgress() {
+        return this.status == ReservationStatus.IN_PROGRESS;
+    }
 }

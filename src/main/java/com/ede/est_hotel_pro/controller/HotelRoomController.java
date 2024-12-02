@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -29,19 +30,28 @@ public class HotelRoomController {
     @GetMapping
     public List<HotelRoomResponse> getAllRooms() {
         List<HotelRoomEntity> rooms = hotelRoomService.findAllRooms();
-        return rooms.stream().map(HotelRoomResponse::toDto).toList();
+        return rooms.stream().map(HotelRoomResponse::toDtoWithoutReservations).toList();
     }
+
+    @GetMapping("/filter")
+    public List<HotelRoomResponse> getFilteredRooms(
+            @RequestParam(required = false) CategoryRoom category,
+            @RequestParam(required = false) Boolean available) {
+        List<HotelRoomEntity> rooms = hotelRoomService.findRoomsByFilters(category, available);
+        return rooms.stream().map(HotelRoomResponse::toDtoWithoutReservations).toList();
+    }
+
 
     @GetMapping("/available")
     public List<HotelRoomResponse> getAllAvailableRooms() {
         List<HotelRoomEntity> rooms = hotelRoomService.findAllAvailableRooms();
-        return rooms.stream().map(HotelRoomResponse::toDto).toList();
+        return rooms.stream().map(HotelRoomResponse::toDtoWithoutReservations).toList();
     }
 
     @GetMapping("/category/{category}")
     public List<HotelRoomResponse> getAllRoomsByCategory(@PathVariable CategoryRoom category) {
         List<HotelRoomEntity> rooms = hotelRoomService.findAllRoomsByCategory(category);
-        return rooms.stream().map(HotelRoomResponse::toDto).toList();
+        return rooms.stream().map(HotelRoomResponse::toDtoWithoutReservations).toList();
     }
 
     @GetMapping("/{id}")
@@ -57,14 +67,12 @@ public class HotelRoomController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole(T(com.ede.est_hotel_pro.entity.account.Role).ADMIN)")
     public HotelRoomResponse createRoom(@RequestBody CreateRoomRequest createRoomRequest) {
         HotelRoomEntity createdRoomEntity = hotelRoomService.save(createRoomRequest);
         return HotelRoomResponse.toDto(createdRoomEntity);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole(T(com.ede.est_hotel_pro.entity.account.Role).ADMIN)")
     public HotelRoomResponse updateRoom(@PathVariable UUID id, @RequestBody CreateRoomRequest createRoomRequest) {
         HotelRoomEntity updatedRoom = hotelRoomService.update(id, createRoomRequest);
         return HotelRoomResponse.toDto(updatedRoom);
