@@ -1,6 +1,5 @@
 package com.ede.est_hotel_pro.configuration;
 
-import com.ede.est_hotel_pro.entity.account.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
