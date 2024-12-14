@@ -2,7 +2,6 @@ package com.ede.est_hotel_pro.entity.hotelroom;
 
 import com.ede.est_hotel_pro.entity.BaseEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,19 +10,19 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@SuperBuilder(toBuilder = true)
 @Entity
 @Table(name = "hotel_room")
 @Getter
 @Setter
-@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class HotelRoomEntity extends BaseEntity {
@@ -49,5 +48,4 @@ public class HotelRoomEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "hotelRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReservationEntity> reservations = new ArrayList<>();
-
 }

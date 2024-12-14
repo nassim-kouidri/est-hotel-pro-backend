@@ -13,5 +13,8 @@ CREATE TABLE IF NOT EXISTS reservation
     claim              VARCHAR(255),
     review             BIGINT,
     completed          BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at         TIMESTAMP,
+    updated_at         TIMESTAMP,
+    version            int,
     CONSTRAINT fk_room FOREIGN KEY (hotel_room_id) REFERENCES hotel_room (id)
 );

@@ -7,18 +7,18 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "account")
 @Getter
 @Setter
-@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder(toBuilder = true)
 public class AccountEntity extends BaseEntity {
 
     @Column(nullable = false, unique = true)
@@ -36,5 +36,4 @@ public class AccountEntity extends BaseEntity {
 
     @Column(nullable = false)
     private String password;
-
 }

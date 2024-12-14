@@ -1,6 +1,7 @@
 package com.ede.est_hotel_pro.controller;
 
 import com.ede.est_hotel_pro.dto.create.CreateReservationRequest;
+import com.ede.est_hotel_pro.dto.out.ReservationChartResponse;
 import com.ede.est_hotel_pro.dto.out.ReservationResponse;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
@@ -40,6 +41,11 @@ public class ReservationController {
             @RequestParam(required = false) UUID hotelRoomId) {
         List<ReservationEntity> reservations = reservationService.findReservationsByFilter(status, hotelRoomId);
         return reservations.stream().map(ReservationResponse::toDto).toList();
+    }
+
+    @GetMapping("/charts")
+    public List<ReservationChartResponse> getAllReservationsForChart() {
+        return reservationService.findAllReservationsForChart();
     }
 
     @GetMapping("/{id}")

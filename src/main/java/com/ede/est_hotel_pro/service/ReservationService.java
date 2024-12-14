@@ -1,6 +1,7 @@
 package com.ede.est_hotel_pro.service;
 
 import com.ede.est_hotel_pro.dto.create.CreateReservationRequest;
+import com.ede.est_hotel_pro.dto.out.ReservationChartResponse;
 import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
@@ -43,6 +44,10 @@ public class ReservationService {
 
     public List<ReservationEntity> findAllReservations(Optional<ReservationStatus> status) {
         return reservationRepository.findAllByStatusOrAll(status.orElse(null));
+    }
+
+    public List<ReservationChartResponse> findAllReservationsForChart() {
+        return reservationRepository.findAllReservationsForChart();
     }
 
     public ReservationEntity findById(UUID id) {
@@ -133,7 +138,7 @@ public class ReservationService {
 
 
     //    @Scheduled(cron = "0 0 * * * *") // Every hour
-    @Scheduled(cron = "0 */2 * * * *") // Every 2 minutes
+    @Scheduled(cron = "0 */1 * * * *") // Every 1 minute
     @Transactional
     protected void updateRoomAvailabilityBasedOnReservations() {
         List<ReservationEntity> reservationEntitiesToUpdate = reservationRepository.findAllByCompleted(false);

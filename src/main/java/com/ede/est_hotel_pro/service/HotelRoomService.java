@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class HotelRoomService {
 
-    private final String ULR_DEFAULT_IMAGE = "https://www.shutterstock.com/image-vector/default-ui-image-placeholder-wireframes-600nw-1037719192.jpg";
+    private final String ULR_DEFAULT_IMAGE = "https://i.postimg.cc/xd7vWR7w/ede-chambre-default.jpg";
     private final HotelRoomRepository hotelRoomRepository;
 
     public List<HotelRoomEntity> findAllRooms() {

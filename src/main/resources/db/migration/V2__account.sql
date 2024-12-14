@@ -7,5 +7,8 @@ create table if not exists account
         constraint uk_name unique,
     first_name   varchar(255) not null,
     phone_number varchar(255) not null,
-    password     text         not null
+    password     text         not null,
+    created_at   timestamp,
+    updated_at   timestamp,
+    version      int
 );

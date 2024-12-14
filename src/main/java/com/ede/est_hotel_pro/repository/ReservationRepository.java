@@ -1,5 +1,6 @@
 package com.ede.est_hotel_pro.repository;
 
+import com.ede.est_hotel_pro.dto.out.ReservationChartResponse;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,7 +34,14 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
             SELECT r 
             FROM ReservationEntity r 
             WHERE (:status IS NULL OR r.status = :status)
+            ORDER BY r.createdAt DESC
             """)
     List<ReservationEntity> findAllByStatusFilter(@Param("status") ReservationStatus status);
+
+    @Query("""
+            SELECT new com.ede.est_hotel_pro.dto.out.ReservationChartResponse(r.id, r.createdAt)
+            FROM ReservationEntity r
+            """)
+    List<ReservationChartResponse> findAllReservationsForChart();
 
 }
