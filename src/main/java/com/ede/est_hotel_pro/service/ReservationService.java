@@ -137,8 +137,8 @@ public class ReservationService {
     }
 
 
-    //    @Scheduled(cron = "0 0 * * * *") // Every hour
-    @Scheduled(cron = "0 */1 * * * *") // Every 1 minute
+    @Scheduled(cron = "0 0 * * * *") // Every hour
+//    @Scheduled(cron = "0 */1 * * * *") // Every 1 minute
     @Transactional
     protected void updateRoomAvailabilityBasedOnReservations() {
         List<ReservationEntity> reservationEntitiesToUpdate = reservationRepository.findAllByCompleted(false);
