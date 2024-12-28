@@ -47,7 +47,7 @@ public class AccountService {
     public AccountEntity createAccount(CreateAccountRequest createAccount) {
         checkCreateAndUpdateAccount(createAccount);
         AccountEntity accountEntity = new AccountEntity().toBuilder()
-                .name(createAccount.name())
+                .name(createAccount.name().trim())
                 .firstName(createAccount.firstName())
                 .role(STAFF)
                 .phoneNumber(createAccount.phoneNumber())

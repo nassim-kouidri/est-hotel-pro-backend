@@ -39,8 +39,9 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
     List<ReservationEntity> findAllByStatusFilter(@Param("status") ReservationStatus status);
 
     @Query("""
-            SELECT new com.ede.est_hotel_pro.dto.out.ReservationChartResponse(r.id, r.createdAt)
+            SELECT new com.ede.est_hotel_pro.dto.out.ReservationChartResponse(r.id, r.startDate)
             FROM ReservationEntity r
+            ORDER BY r.startDate ASC
             """)
     List<ReservationChartResponse> findAllReservationsForChart();
 
