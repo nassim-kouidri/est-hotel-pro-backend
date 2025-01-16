@@ -19,6 +19,6 @@ public interface HotelRoomRepository extends JpaRepository<HotelRoomEntity, UUID
 
     List<HotelRoomEntity> findAllByCategory(CategoryRoom category);
 
-    @Query("SELECT r FROM HotelRoomEntity r WHERE (:category IS NULL OR r.category = :category) AND (:available IS NULL OR r.available = :available)")
+    @Query("SELECT r FROM HotelRoomEntity r WHERE (:category IS NULL OR r.category = :category) AND (:available IS NULL OR r.available = :available) ORDER BY r.roomNumber ASC")
     List<HotelRoomEntity> findAllByCategoryAndAvailable(@Param("category") CategoryRoom category, @Param("available") Boolean available);
 }
