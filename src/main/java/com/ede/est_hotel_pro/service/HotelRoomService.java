@@ -1,16 +1,20 @@
 package com.ede.est_hotel_pro.service;
 
 import com.ede.est_hotel_pro.dto.create.CreateRoomRequest;
+import com.ede.est_hotel_pro.entity.BaseEntity;
 import com.ede.est_hotel_pro.entity.hotelroom.CategoryRoom;
 import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 import com.ede.est_hotel_pro.repository.HotelRoomRepository;
+import com.ede.est_hotel_pro.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +22,7 @@ public class HotelRoomService {
 
     private final String ULR_DEFAULT_IMAGE = "https://i.postimg.cc/xd7vWR7w/ede-chambre-default.jpg";
     private final HotelRoomRepository hotelRoomRepository;
+    private final ReservationRepository reservationRepository;
 
     public List<HotelRoomEntity> findAllRooms() {
         return hotelRoomRepository.findAll();
@@ -97,5 +102,27 @@ public class HotelRoomService {
 
     private String getImageUrl(CreateRoomRequest roomRequest) {
         return StringUtils.isEmpty(roomRequest.imageUrl()) ? ULR_DEFAULT_IMAGE : roomRequest.imageUrl();
+    }
+
+    public List<HotelRoomEntity> findAvailableRoomsOnDate(Instant date) {
+        List<HotelRoomEntity> allRooms = findAllRooms();
+
+        return allRooms.stream()
+                .filter(room -> isRoomAvailableOnDate(room.getId(), date))
+                .collect(Collectors.toList());
+    }
+
+    private boolean isRoomAvailableOnDate(UUID roomId, Instant date) {
+        // Create a time range for the entire day
+        Instant startOfDay = date.minusSeconds(date.getEpochSecond() % 86400);
+        Instant endOfDay = startOfDay.plusSeconds(86400);
+
+        List<UUID> overlappingReservations = reservationRepository
+                .findAllByHotelRoom_IdAndStartDateLessThanAndEndDateGreaterThan(roomId, endOfDay, startOfDay)
+                .stream()
+                .map(BaseEntity::getId)
+                .toList();
+
+        return overlappingReservations.isEmpty();
     }
 }

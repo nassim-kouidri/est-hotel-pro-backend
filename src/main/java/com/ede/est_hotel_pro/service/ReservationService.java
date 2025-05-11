@@ -1,18 +1,28 @@
 package com.ede.est_hotel_pro.service;
 
 import com.ede.est_hotel_pro.dto.create.CreateReservationRequest;
+import com.ede.est_hotel_pro.dto.out.DailyReservationsResponse;
+import com.ede.est_hotel_pro.dto.out.MonthlyCalendarResponse;
 import com.ede.est_hotel_pro.dto.out.ReservationChartResponse;
+import com.ede.est_hotel_pro.dto.out.ReservationResponse;
 import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
 import com.ede.est_hotel_pro.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,6 +50,18 @@ public class ReservationService {
                     .toList();
         }
         return reservations;
+    }
+
+    public Page<ReservationEntity> findReservationsByFilterPageable(ReservationStatus status, UUID hotelRoomId, Pageable pageable) {
+        Page<ReservationEntity> reservationsPage = reservationRepository.findAllByStatusFilterPageable(status, pageable);
+        if (hotelRoomId != null) {
+            List<ReservationEntity> filteredList = reservationsPage.getContent().stream()
+                    .filter(reservation -> reservation.getHotelRoom().getId().equals(hotelRoomId))
+                    .toList();
+
+            return new PageImpl<>(filteredList, pageable, filteredList.size());
+        }
+        return reservationsPage;
     }
 
     public List<ReservationEntity> findAllReservations(Optional<ReservationStatus> status) {
@@ -137,8 +159,8 @@ public class ReservationService {
     }
 
 
-    @Scheduled(cron = "0 0 * * * *") // Every hour
-//    @Scheduled(cron = "0 */1 * * * *") // Every 1 minute
+    //    @Scheduled(cron = "0 0 * * * *") // Every hour
+    @Scheduled(cron = "0 */1 * * * *") // Every 1 minute
     @Transactional
     protected void updateRoomAvailabilityBasedOnReservations() {
         List<ReservationEntity> reservationEntitiesToUpdate = reservationRepository.findAllByCompleted(false);
@@ -161,5 +183,51 @@ public class ReservationService {
                 reservationRepository.save(reservation);
             }
         }
+    }
+
+    /**
+     * Get a monthly calendar with reservation counts for each day.
+     *
+     * @param year  The year
+     * @param month The month (1-12)
+     * @return A MonthlyCalendarResponse containing reservation counts for each day
+     */
+    public MonthlyCalendarResponse getMonthlyCalendar(int year, int month) {
+        List<Object[]> dailyCounts = reservationRepository.countReservationsByDayInMonth(year, month);
+
+        // Convert the list of Object[] to a Map<Integer, Integer>
+        Map<Integer, Integer> dailyReservationCounts = new HashMap<>();
+        for (Object[] result : dailyCounts) {
+            Integer day = ((Number) result[0]).intValue();
+            Integer count = ((Number) result[1]).intValue();
+            dailyReservationCounts.put(day, count);
+        }
+
+        return MonthlyCalendarResponse.create(year, month, dailyReservationCounts);
+    }
+
+    /**
+     * Get detailed information about reservations for a specific date.
+     *
+     * @param date The date to get reservations for
+     * @return A DailyReservationsResponse containing detailed information about reservations
+     */
+    public DailyReservationsResponse getDailyReservations(LocalDate date) {
+        List<ReservationEntity> reservations = reservationRepository.findAllReservationsForDate(date);
+        List<ReservationResponse> reservationResponses = reservations.stream()
+                .map(ReservationResponse::toDto)
+                .toList();
+
+        return DailyReservationsResponse.create(date, reservationResponses);
+    }
+
+    /**
+     * Convert an Instant to a LocalDate using the system default time zone.
+     *
+     * @param instant The Instant to convert
+     * @return The LocalDate
+     */
+    private LocalDate instantToLocalDate(Instant instant) {
+        return instant.atZone(ZoneId.systemDefault()).toLocalDate();
     }
 }
