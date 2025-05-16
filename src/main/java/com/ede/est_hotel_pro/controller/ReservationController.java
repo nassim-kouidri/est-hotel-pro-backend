@@ -55,9 +55,11 @@ public class ReservationController {
     public Page<ReservationResponse> getReservationsPageable(
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(required = false) UUID hotelRoomId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @ParameterObject Pageable pageable) {
 
-        Page<ReservationEntity> reservationsPage = reservationService.findReservationsByFilterPageable(status, hotelRoomId, pageable);
+        Page<ReservationEntity> reservationsPage = reservationService.findReservationsByFilterPageable(status, hotelRoomId, startDate, endDate, pageable);
         return reservationsPage.map(ReservationResponse::toDto);
     }
 

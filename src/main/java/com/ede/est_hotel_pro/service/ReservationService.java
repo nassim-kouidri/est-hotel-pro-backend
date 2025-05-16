@@ -52,8 +52,8 @@ public class ReservationService {
         return reservations;
     }
 
-    public Page<ReservationEntity> findReservationsByFilterPageable(ReservationStatus status, UUID hotelRoomId, Pageable pageable) {
-        Page<ReservationEntity> reservationsPage = reservationRepository.findAllByStatusFilterPageable(status, pageable);
+    public Page<ReservationEntity> findReservationsByFilterPageable(ReservationStatus status, UUID hotelRoomId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Page<ReservationEntity> reservationsPage = reservationRepository.findAllByStatusFilterPageable(status, startDate, endDate, pageable);
         if (hotelRoomId != null) {
             List<ReservationEntity> filteredList = reservationsPage.getContent().stream()
                     .filter(reservation -> reservation.getHotelRoom().getId().equals(hotelRoomId))
@@ -159,8 +159,8 @@ public class ReservationService {
     }
 
 
-    //    @Scheduled(cron = "0 0 * * * *") // Every hour
-    @Scheduled(cron = "0 */1 * * * *") // Every 1 minute
+        @Scheduled(cron = "0 0 * * * *") // Every hour
+//    @Scheduled(cron = "0 */1 * * * *") // Every 1 minute
     @Transactional
     protected void updateRoomAvailabilityBasedOnReservations() {
         List<ReservationEntity> reservationEntitiesToUpdate = reservationRepository.findAllByCompleted(false);

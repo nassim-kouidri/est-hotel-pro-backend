@@ -101,4 +101,19 @@ public class HotelRoomController {
         List<HotelRoomEntity> availableRooms = hotelRoomService.findAvailableRoomsOnDate(dateInstant);
         return availableRooms.stream().map(HotelRoomResponse::toDtoWithoutReservations).toList();
     }
+
+    // (format: yyyy-MM-dd)
+    @GetMapping("/available-between-dates")
+    @Operation(summary = "Get all rooms available between two dates")
+    public List<HotelRoomResponse> getAvailableRoomsBetweenDates(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        // Convert LocalDate to Instant at midnight UTC
+        Instant startDateInstant = startDate.atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant endDateInstant = endDate.atStartOfDay(ZoneId.of("UTC")).toInstant();
+
+        List<HotelRoomEntity> availableRooms = hotelRoomService.findAvailableRoomsBetweenDates(startDateInstant, endDateInstant);
+        return availableRooms.stream().map(HotelRoomResponse::toDtoWithoutReservations).toList();
+    }
 }

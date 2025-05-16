@@ -45,9 +45,15 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
             SELECT r 
             FROM ReservationEntity r 
             WHERE (:status IS NULL OR r.status = :status)
-            ORDER BY r.createdAt DESC
+            AND FUNCTION('DATE', r.startDate) <= :endDate
+            AND FUNCTION('DATE', r.endDate) >= :startDate
+            ORDER BY r.startDate ASC
             """)
-    Page<ReservationEntity> findAllByStatusFilterPageable(@Param("status") ReservationStatus status, Pageable pageable);
+    Page<ReservationEntity> findAllByStatusFilterPageable(
+            @Param("status") ReservationStatus status,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable);
 
     @Query("""
             SELECT new com.ede.est_hotel_pro.dto.out.ReservationChartResponse(r.id, r.startDate)

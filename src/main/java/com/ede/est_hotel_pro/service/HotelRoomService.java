@@ -112,6 +112,14 @@ public class HotelRoomService {
                 .collect(Collectors.toList());
     }
 
+    public List<HotelRoomEntity> findAvailableRoomsBetweenDates(Instant startDate, Instant endDate) {
+        List<HotelRoomEntity> allRooms = findAllRooms();
+
+        return allRooms.stream()
+                .filter(room -> isRoomAvailableBetweenDates(room.getId(), startDate, endDate))
+                .collect(Collectors.toList());
+    }
+
     private boolean isRoomAvailableOnDate(UUID roomId, Instant date) {
         // Create a time range for the entire day
         Instant startOfDay = date.minusSeconds(date.getEpochSecond() % 86400);
@@ -119,6 +127,21 @@ public class HotelRoomService {
 
         List<UUID> overlappingReservations = reservationRepository
                 .findAllByHotelRoom_IdAndStartDateLessThanAndEndDateGreaterThan(roomId, endOfDay, startOfDay)
+                .stream()
+                .map(BaseEntity::getId)
+                .toList();
+
+        return overlappingReservations.isEmpty();
+    }
+
+    private boolean isRoomAvailableBetweenDates(UUID roomId, Instant startDate, Instant endDate) {
+        // Ensure startDate is before endDate
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
+
+        List<UUID> overlappingReservations = reservationRepository
+                .findAllByHotelRoom_IdAndStartDateLessThanAndEndDateGreaterThan(roomId, endDate, startDate)
                 .stream()
                 .map(BaseEntity::getId)
                 .toList();
