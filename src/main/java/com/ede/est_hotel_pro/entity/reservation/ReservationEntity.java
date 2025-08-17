@@ -63,6 +63,12 @@ public class ReservationEntity extends BaseEntity {
     @Column(nullable = false)
     private boolean completed;
 
+    @Column(nullable = false)
+    private boolean isContracted = false;
+
+    @Column
+    private String companyName;
+
     public boolean isReservationFinished() {
         return this.status == ReservationStatus.ENDED;
     }

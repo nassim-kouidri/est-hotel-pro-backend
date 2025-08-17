@@ -93,6 +93,8 @@ public class ReservationService {
                 .claim(request.claim())
                 .review(request.review())
                 .status(handleReservationStatus(request.startDate(), request.endDate()))
+                .isContracted(request.isContracted())
+                .companyName(request.companyName())
                 .build();
 
         reservation.setCompleted(reservation.isReservationFinished());
@@ -114,6 +116,8 @@ public class ReservationService {
         existingReservation.setPricePaid(request.pricePaid());
         existingReservation.setClaim(request.claim());
         existingReservation.setReview(request.review());
+        existingReservation.setContracted(request.isContracted());
+        existingReservation.setCompanyName(request.companyName());
 
         return reservationRepository.save(existingReservation);
     }
@@ -135,6 +139,9 @@ public class ReservationService {
         }
         if (!isRoomAvailableBetweenDates(request.roomId(), request.startDate(), request.endDate())) {
             throw new IllegalArgumentException("The room is not available during the requested period.");
+        }
+        if (request.isContracted() && (request.companyName() == null || request.companyName().trim().isEmpty())) {
+            throw new IllegalArgumentException("Company name is required for contracted clients.");
         }
     }
 

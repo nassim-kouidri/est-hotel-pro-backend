@@ -18,7 +18,9 @@ public record ReservationResponse(
         int numberOfAdults,
         int pricePaid,
         long review,
-        ReservationStatus status
+        ReservationStatus status,
+        boolean isContracted,
+        String companyName
 ) {
     public static ReservationResponse toDto(ReservationEntity reservation) {
         return new ReservationResponse(
@@ -32,7 +34,9 @@ public record ReservationResponse(
                 reservation.getNumberOfAdults(),
                 reservation.getPricePaid(),
                 reservation.getReview(),
-                reservation.getStatus()
+                reservation.getStatus(),
+                reservation.isContracted(),
+                reservation.getCompanyName()
         );
     }
 
@@ -48,7 +52,9 @@ public record ReservationResponse(
                 reservation.getNumberOfAdults(),
                 reservation.getPricePaid(),
                 reservation.getReview(),
-                reservation.getStatus()
+                reservation.getStatus(),
+                reservation.isContracted(),
+                reservation.getCompanyName()
         );
     }
 }

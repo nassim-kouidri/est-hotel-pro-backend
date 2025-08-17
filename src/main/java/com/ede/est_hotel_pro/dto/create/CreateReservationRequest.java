@@ -14,5 +14,7 @@ public record CreateReservationRequest(
         int numberOfChildren,
         int numberOfAdults,
         int pricePaid,
-        long review) {
+        long review,
+        boolean isContracted,
+        String companyName) {
 }
