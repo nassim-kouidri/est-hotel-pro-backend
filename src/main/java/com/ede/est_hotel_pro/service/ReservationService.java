@@ -8,6 +8,7 @@ import com.ede.est_hotel_pro.dto.out.ReservationResponse;
 import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
+import com.ede.est_hotel_pro.entity.reservation.PaymentStatus;
 import com.ede.est_hotel_pro.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -42,18 +43,8 @@ public class ReservationService {
         return reservationRepository.findAllByStatus(status);
     }
 
-    public List<ReservationEntity> findReservationsByFilter(ReservationStatus status, UUID hotelRoomId) {
-        List<ReservationEntity> reservations = reservationRepository.findAllByStatusFilter(status);
-        if (hotelRoomId != null) {
-            reservations = reservations.stream()
-                    .filter(reservation -> reservation.getHotelRoom().getId().equals(hotelRoomId))
-                    .toList();
-        }
-        return reservations;
-    }
-
-    public Page<ReservationEntity> findReservationsByFilterPageable(ReservationStatus status, UUID hotelRoomId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        Page<ReservationEntity> reservationsPage = reservationRepository.findAllByStatusFilterPageable(status, startDate, endDate, pageable);
+    public Page<ReservationEntity> findAllReservationsByFilterPageable(ReservationStatus status, PaymentStatus paymentStatus, UUID hotelRoomId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Page<ReservationEntity> reservationsPage = reservationRepository.findAllReservationsByFilterPageable(status, paymentStatus, startDate, endDate, pageable);
         if (hotelRoomId != null) {
             List<ReservationEntity> filteredList = reservationsPage.getContent().stream()
                     .filter(reservation -> reservation.getHotelRoom().getId().equals(hotelRoomId))
@@ -95,6 +86,8 @@ public class ReservationService {
                 .status(handleReservationStatus(request.startDate(), request.endDate()))
                 .isContracted(request.isContracted())
                 .companyName(request.companyName())
+                .paymentStatus(request.paymentStatus() != null ? request.paymentStatus() : PaymentStatus.FULLY_PAID)
+                .paymentRemark(request.paymentRemark())
                 .build();
 
         reservation.setCompleted(reservation.isReservationFinished());
@@ -118,6 +111,8 @@ public class ReservationService {
         existingReservation.setReview(request.review());
         existingReservation.setContracted(request.isContracted());
         existingReservation.setCompanyName(request.companyName());
+        existingReservation.setPaymentStatus(request.paymentStatus() != null ? request.paymentStatus() : PaymentStatus.FULLY_PAID);
+        existingReservation.setPaymentRemark(request.paymentRemark());
 
         return reservationRepository.save(existingReservation);
     }
@@ -143,6 +138,18 @@ public class ReservationService {
         if (request.isContracted() && (request.companyName() == null || request.companyName().trim().isEmpty())) {
             throw new IllegalArgumentException("Company name is required for contracted clients.");
         }
+        // Payment rules
+        PaymentStatus status = request.paymentStatus() != null ? request.paymentStatus() : PaymentStatus.FULLY_PAID;
+        String remark = request.paymentRemark();
+        if (status == PaymentStatus.FULLY_PAID) {
+            if (remark != null && !remark.trim().isEmpty()) {
+                throw new IllegalArgumentException("Payment remark must be empty when payment status is FULLY_PAID.");
+            }
+        } else { // PARTIALLY_PAID or NOT_PAID
+            if (remark == null || remark.trim().isEmpty()) {
+                throw new IllegalArgumentException("Payment remark is required when payment is partially or not paid.");
+            }
+        }
     }
 
     private boolean isRoomAvailableBetweenDates(UUID roomId, Instant startDate, Instant endDate) {
@@ -166,7 +173,7 @@ public class ReservationService {
     }
 
 
-        @Scheduled(cron = "0 0 * * * *") // Every hour
+    @Scheduled(cron = "0 0 * * * *") // Every hour
 //    @Scheduled(cron = "0 */1 * * * *") // Every 1 minute
     @Transactional
     protected void updateRoomAvailabilityBasedOnReservations() {

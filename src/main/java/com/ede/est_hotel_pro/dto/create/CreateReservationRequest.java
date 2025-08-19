@@ -1,5 +1,6 @@
 package com.ede.est_hotel_pro.dto.create;
 
+import com.ede.est_hotel_pro.entity.reservation.PaymentStatus;
 import com.ede.est_hotel_pro.entity.reservation.UserSnapshot;
 
 import java.time.Instant;
@@ -16,5 +17,7 @@ public record CreateReservationRequest(
         int pricePaid,
         long review,
         boolean isContracted,
-        String companyName) {
+        String companyName,
+        PaymentStatus paymentStatus,
+        String paymentRemark) {
 }

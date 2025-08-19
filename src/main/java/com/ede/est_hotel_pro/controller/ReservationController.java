@@ -7,6 +7,7 @@ import com.ede.est_hotel_pro.dto.out.ReservationChartResponse;
 import com.ede.est_hotel_pro.dto.out.ReservationResponse;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
+import com.ede.est_hotel_pro.entity.reservation.PaymentStatus;
 import com.ede.est_hotel_pro.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,23 +44,16 @@ public class ReservationController {
         return reservationService.findAll().stream().map(ReservationResponse::toDto).toList();
     }
 
-    @GetMapping("/filter")
-    public List<ReservationResponse> getReservations(
-            @RequestParam(required = false) ReservationStatus status,
-            @RequestParam(required = false) UUID hotelRoomId) {
-        List<ReservationEntity> reservations = reservationService.findReservationsByFilter(status, hotelRoomId);
-        return reservations.stream().map(ReservationResponse::toDto).toList();
-    }
-
     @GetMapping("/filter/pageable")
     public Page<ReservationResponse> getReservationsPageable(
             @RequestParam(required = false) ReservationStatus status,
+            @RequestParam(required = false) PaymentStatus paymentStatus,
             @RequestParam(required = false) UUID hotelRoomId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @ParameterObject Pageable pageable) {
 
-        Page<ReservationEntity> reservationsPage = reservationService.findReservationsByFilterPageable(status, hotelRoomId, startDate, endDate, pageable);
+        Page<ReservationEntity> reservationsPage = reservationService.findAllReservationsByFilterPageable(status, paymentStatus, hotelRoomId, startDate, endDate, pageable);
         return reservationsPage.map(ReservationResponse::toDto);
     }
 

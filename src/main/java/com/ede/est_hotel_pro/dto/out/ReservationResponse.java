@@ -3,6 +3,7 @@ package com.ede.est_hotel_pro.dto.out;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
 import com.ede.est_hotel_pro.entity.reservation.UserSnapshot;
+import com.ede.est_hotel_pro.entity.reservation.PaymentStatus;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,7 +21,9 @@ public record ReservationResponse(
         long review,
         ReservationStatus status,
         boolean isContracted,
-        String companyName
+        String companyName,
+        PaymentStatus paymentStatus,
+        String paymentRemark
 ) {
     public static ReservationResponse toDto(ReservationEntity reservation) {
         return new ReservationResponse(
@@ -36,7 +39,9 @@ public record ReservationResponse(
                 reservation.getReview(),
                 reservation.getStatus(),
                 reservation.isContracted(),
-                reservation.getCompanyName()
+                reservation.getCompanyName(),
+                reservation.getPaymentStatus(),
+                reservation.getPaymentRemark()
         );
     }
 
@@ -54,7 +59,9 @@ public record ReservationResponse(
                 reservation.getReview(),
                 reservation.getStatus(),
                 reservation.isContracted(),
-                reservation.getCompanyName()
+                reservation.getCompanyName(),
+                reservation.getPaymentStatus(),
+                reservation.getPaymentRemark()
         );
     }
 }

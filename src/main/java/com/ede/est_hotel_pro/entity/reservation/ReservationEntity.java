@@ -69,6 +69,13 @@ public class ReservationEntity extends BaseEntity {
     @Column
     private String companyName;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentStatus paymentStatus = PaymentStatus.FULLY_PAID;
+
+    @Column
+    private String paymentRemark;
+
     public boolean isReservationFinished() {
         return this.status == ReservationStatus.ENDED;
     }

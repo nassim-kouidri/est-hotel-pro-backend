@@ -3,6 +3,7 @@ package com.ede.est_hotel_pro.repository;
 import com.ede.est_hotel_pro.dto.out.ReservationChartResponse;
 import com.ede.est_hotel_pro.entity.reservation.ReservationEntity;
 import com.ede.est_hotel_pro.entity.reservation.ReservationStatus;
+import com.ede.est_hotel_pro.entity.reservation.PaymentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,34 +27,11 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
 
     List<ReservationEntity> findAllByStatus(ReservationStatus status);
 
-    List<ReservationEntity> findAllByStatusIn(List<ReservationStatus> status);
-
     List<ReservationEntity> findAllByCompleted(boolean completed);
 
     @Query("SELECT r FROM ReservationEntity r WHERE :status IS NULL OR r.status = :status")
     List<ReservationEntity> findAllByStatusOrAll(@Param("status") ReservationStatus status);
 
-    @Query("""
-            SELECT r 
-            FROM ReservationEntity r 
-            WHERE (:status IS NULL OR r.status = :status)
-            ORDER BY r.createdAt DESC
-            """)
-    List<ReservationEntity> findAllByStatusFilter(@Param("status") ReservationStatus status);
-
-    @Query("""
-            SELECT r 
-            FROM ReservationEntity r 
-            WHERE (:status IS NULL OR r.status = :status)
-            AND FUNCTION('DATE', r.startDate) <= :endDate
-            AND FUNCTION('DATE', r.endDate) >= :startDate
-            ORDER BY r.startDate ASC
-            """)
-    Page<ReservationEntity> findAllByStatusFilterPageable(
-            @Param("status") ReservationStatus status,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            Pageable pageable);
 
     @Query("""
             SELECT new com.ede.est_hotel_pro.dto.out.ReservationChartResponse(r.id, r.startDate)
@@ -69,6 +47,22 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
             ORDER BY r.startDate ASC
             """)
     List<ReservationEntity> findAllReservationsForDate(@Param("date") LocalDate date);
+
+    @Query("""
+            SELECT r 
+            FROM ReservationEntity r 
+            WHERE (:status IS NULL OR r.status = :status)
+            AND (:paymentStatus IS NULL OR r.paymentStatus = :paymentStatus)
+            AND FUNCTION('DATE', r.startDate) <= :endDate
+            AND FUNCTION('DATE', r.endDate) >= :startDate
+            ORDER BY r.startDate ASC
+            """)
+    Page<ReservationEntity> findAllReservationsByFilterPageable(
+            @Param("status") ReservationStatus status,
+            @Param("paymentStatus") PaymentStatus paymentStatus,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable);
 
     /**
      * Count the number of reservations for each day in a month.
