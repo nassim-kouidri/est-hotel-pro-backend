@@ -53,6 +53,7 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
             FROM ReservationEntity r 
             WHERE (:status IS NULL OR r.status = :status)
             AND (:paymentStatus IS NULL OR r.paymentStatus = :paymentStatus)
+            AND (:companyName IS NULL OR r.companyName = :companyName)
             AND FUNCTION('DATE', r.startDate) <= :endDate
             AND FUNCTION('DATE', r.endDate) >= :startDate
             ORDER BY r.startDate ASC
@@ -60,6 +61,7 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
     Page<ReservationEntity> findAllReservationsByFilterPageable(
             @Param("status") ReservationStatus status,
             @Param("paymentStatus") PaymentStatus paymentStatus,
+            @Param("companyName") String companyName,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             Pageable pageable);
@@ -80,4 +82,13 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
             GROUP BY EXTRACT(DAY FROM FUNCTION('DATE', r.startDate))
             """)
     List<Object[]> countReservationsByDayInMonth(@Param("year") int year, @Param("month") int month);
+
+    @Query("""
+            SELECT DISTINCT r.companyName
+            FROM ReservationEntity r
+            WHERE r.isContracted = TRUE
+              AND r.companyName IS NOT NULL
+              AND r.companyName <> ''
+            """)
+    List<String> findDistinctCompanyNamesForContracted();
 }

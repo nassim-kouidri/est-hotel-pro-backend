@@ -48,12 +48,13 @@ public class ReservationController {
     public Page<ReservationResponse> getReservationsPageable(
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(required = false) PaymentStatus paymentStatus,
+            @RequestParam(required = false) String companyName,
             @RequestParam(required = false) UUID hotelRoomId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @ParameterObject Pageable pageable) {
 
-        Page<ReservationEntity> reservationsPage = reservationService.findAllReservationsByFilterPageable(status, paymentStatus, hotelRoomId, startDate, endDate, pageable);
+        Page<ReservationEntity> reservationsPage = reservationService.findAllReservationsByFilterPageable(status, paymentStatus, companyName, hotelRoomId, startDate, endDate, pageable);
         return reservationsPage.map(ReservationResponse::toDto);
     }
 
@@ -103,5 +104,11 @@ public class ReservationController {
     public DailyReservationsResponse getDailyReservations(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return reservationService.getDailyReservations(date);
+    }
+
+    @GetMapping("/companies")
+    @Operation(summary = "Get unique list of contracted companies (normalized, alphabetically sorted)")
+    public List<String> getCompanies() {
+        return reservationService.getDistinctNormalizedCompanies();
     }
 }

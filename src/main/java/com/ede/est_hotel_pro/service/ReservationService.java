@@ -43,8 +43,8 @@ public class ReservationService {
         return reservationRepository.findAllByStatus(status);
     }
 
-    public Page<ReservationEntity> findAllReservationsByFilterPageable(ReservationStatus status, PaymentStatus paymentStatus, UUID hotelRoomId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        Page<ReservationEntity> reservationsPage = reservationRepository.findAllReservationsByFilterPageable(status, paymentStatus, startDate, endDate, pageable);
+    public Page<ReservationEntity> findAllReservationsByFilterPageable(ReservationStatus status, PaymentStatus paymentStatus, String companyName, UUID hotelRoomId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        Page<ReservationEntity> reservationsPage = reservationRepository.findAllReservationsByFilterPageable(status, paymentStatus, companyName, startDate, endDate, pageable);
         if (hotelRoomId != null) {
             List<ReservationEntity> filteredList = reservationsPage.getContent().stream()
                     .filter(reservation -> reservation.getHotelRoom().getId().equals(hotelRoomId))
@@ -73,6 +73,10 @@ public class ReservationService {
         checkCreateAndUpdateReservation(request);
         HotelRoomEntity roomEntity = hotelRoomService.findById(request.roomId());
 
+        String normalizedCompany = (request.isContracted() && request.companyName() != null)
+                ? normalizeCompanyName(request.companyName())
+                : null;
+
         ReservationEntity reservation = new ReservationEntity().toBuilder()
                 .startDate(request.startDate())
                 .endDate(request.endDate())
@@ -85,7 +89,7 @@ public class ReservationService {
                 .review(request.review())
                 .status(handleReservationStatus(request.startDate(), request.endDate()))
                 .isContracted(request.isContracted())
-                .companyName(request.companyName())
+                .companyName(normalizedCompany)
                 .paymentStatus(request.paymentStatus() != null ? request.paymentStatus() : PaymentStatus.FULLY_PAID)
                 .paymentRemark(request.paymentRemark())
                 .build();
@@ -110,7 +114,10 @@ public class ReservationService {
         existingReservation.setClaim(request.claim());
         existingReservation.setReview(request.review());
         existingReservation.setContracted(request.isContracted());
-        existingReservation.setCompanyName(request.companyName());
+        String normalizedCompany = (request.isContracted() && request.companyName() != null)
+                ? normalizeCompanyName(request.companyName())
+                : null;
+        existingReservation.setCompanyName(normalizedCompany);
         existingReservation.setPaymentStatus(request.paymentStatus() != null ? request.paymentStatus() : PaymentStatus.FULLY_PAID);
         existingReservation.setPaymentRemark(request.paymentRemark());
 
@@ -170,6 +177,30 @@ public class ReservationService {
             return ReservationStatus.COMING;
         }
         throw new IllegalStateException("Invalid reservation dates");
+    }
+
+    private String normalizeCompanyName(String name) {
+        if (name == null) return null;
+        // Trim, collapse multiple spaces, lower-case
+        String cleaned = name.trim().replaceAll("\\s+", " ");
+        if (cleaned.isEmpty()) return "";
+        // Title-case words and handle hyphenated parts
+        StringBuilder sb = new StringBuilder();
+        String[] words = cleaned.toLowerCase().split(" ");
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) sb.append(' ');
+            String w = words[i];
+            String[] hyphenParts = w.split("-");
+            for (int j = 0; j < hyphenParts.length; j++) {
+                String part = hyphenParts[j];
+                if (!part.isEmpty()) {
+                    sb.append(Character.toUpperCase(part.charAt(0)));
+                    if (part.length() > 1) sb.append(part.substring(1));
+                }
+                if (j < hyphenParts.length - 1) sb.append('-');
+            }
+        }
+        return sb.toString();
     }
 
 
@@ -233,6 +264,19 @@ public class ReservationService {
                 .toList();
 
         return DailyReservationsResponse.create(date, reservationResponses);
+    }
+
+    /**
+     * Return unique, normalized company names for contracted reservations, sorted alphabetically.
+     */
+    public List<String> getDistinctNormalizedCompanies() {
+        List<String> raw = reservationRepository.findDistinctCompanyNamesForContracted();
+        return raw.stream()
+                .filter(s -> s != null && !s.trim().isEmpty())
+                .map(this::normalizeCompanyName)
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
     }
 
     /**
