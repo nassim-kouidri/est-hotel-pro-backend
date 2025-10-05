@@ -2,7 +2,8 @@ package com.ede.est_hotel_pro.repository;
 
 import com.ede.est_hotel_pro.entity.hotelroom.CategoryRoom;
 import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
-import jdk.jfr.Category;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,6 +20,13 @@ public interface HotelRoomRepository extends JpaRepository<HotelRoomEntity, UUID
 
     List<HotelRoomEntity> findAllByCategory(CategoryRoom category);
 
+    List<HotelRoomEntity> findAllByAvailable(boolean available);
+
     @Query("SELECT r FROM HotelRoomEntity r WHERE (:category IS NULL OR r.category = :category) AND (:available IS NULL OR r.available = :available) ORDER BY r.roomNumber ASC")
     List<HotelRoomEntity> findAllByCategoryAndAvailable(@Param("category") CategoryRoom category, @Param("available") Boolean available);
+
+    @Query("SELECT r FROM HotelRoomEntity r WHERE (:category IS NULL OR r.category = :category) AND (:available IS NULL OR r.available = :available) ORDER BY r.roomNumber ASC")
+    Page<HotelRoomEntity> findAllByCategoryAndAvailable(@Param("category") CategoryRoom category,
+                                                        @Param("available") Boolean available,
+                                                        Pageable pageable);
 }

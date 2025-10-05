@@ -9,6 +9,8 @@ import com.ede.est_hotel_pro.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -29,7 +31,7 @@ public class HotelRoomService {
     }
 
     public List<HotelRoomEntity> findAllAvailableRooms() {
-        return findAllRooms().stream().filter(HotelRoomEntity::isAvailable).toList();
+        return hotelRoomRepository.findAllByAvailable(true);
     }
 
     public List<HotelRoomEntity> findAllRoomsByCategory(CategoryRoom categoryRoom) {
@@ -38,6 +40,10 @@ public class HotelRoomService {
 
     public List<HotelRoomEntity> findRoomsByFilters(CategoryRoom category, Boolean available) {
         return hotelRoomRepository.findAllByCategoryAndAvailable(category, available);
+    }
+
+    public Page<HotelRoomEntity> findRoomsByFiltersPageable(CategoryRoom category, Boolean available, Pageable pageable) {
+        return hotelRoomRepository.findAllByCategoryAndAvailable(category, available, pageable);
     }
 
     public HotelRoomEntity findById(UUID id) {

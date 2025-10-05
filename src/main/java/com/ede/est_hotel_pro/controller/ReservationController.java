@@ -39,11 +39,6 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @GetMapping
-    public List<ReservationResponse> getAllReservations() {
-        return reservationService.findAll().stream().map(ReservationResponse::toDto).toList();
-    }
-
     @GetMapping("/filter/pageable")
     public Page<ReservationResponse> getReservationsPageable(
             @RequestParam(required = false) ReservationStatus status,
@@ -66,11 +61,6 @@ public class ReservationController {
     @GetMapping("/{id}")
     public ReservationResponse getReservationById(@PathVariable UUID id) {
         return ReservationResponse.toDto(reservationService.findById(id));
-    }
-
-    @GetMapping("/status/{status}")
-    public List<ReservationResponse> getAllReservationsByStatus(@PathVariable ReservationStatus status) {
-        return reservationService.findAllByStatus(status).stream().map(ReservationResponse::toDto).toList();
     }
 
     @PostMapping

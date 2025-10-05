@@ -28,7 +28,7 @@ import java.time.Instant;
 @SuperBuilder(toBuilder = true)
 public class ReservationEntity extends BaseEntity {
 
-    @Column
+    @Column(columnDefinition = "jsonb")
     @Type(JsonBinaryType.class)
     private UserSnapshot userReservation;
 

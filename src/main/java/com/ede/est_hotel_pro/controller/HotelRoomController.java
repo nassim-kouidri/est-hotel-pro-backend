@@ -7,6 +7,9 @@ import com.ede.est_hotel_pro.entity.hotelroom.HotelRoomEntity;
 import com.ede.est_hotel_pro.service.HotelRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,12 +35,6 @@ public class HotelRoomController {
 
     private final HotelRoomService hotelRoomService;
 
-    @GetMapping
-    public List<HotelRoomResponse> getAllRooms() {
-        List<HotelRoomEntity> rooms = hotelRoomService.findAllRooms();
-        return rooms.stream().map(HotelRoomResponse::toDtoWithoutReservations).toList();
-    }
-
     @GetMapping("/filter")
     public List<HotelRoomResponse> getFilteredRooms(
             @RequestParam(required = false) CategoryRoom category,
@@ -46,6 +43,16 @@ public class HotelRoomController {
         return rooms.stream().map(HotelRoomResponse::toDtoWithoutReservations).toList();
     }
 
+    @GetMapping("/filter/pageable")
+    @Operation(summary = "Get filtered rooms with pagination (same pagination params as reservations)")
+    public Page<HotelRoomResponse> getFilteredRoomsPageable(
+            @RequestParam(required = false) CategoryRoom category,
+            @RequestParam(required = false) Boolean available,
+            @ParameterObject Pageable pageable) {
+        return hotelRoomService
+                .findRoomsByFiltersPageable(category, available, pageable)
+                .map(HotelRoomResponse::toDtoWithoutReservations);
+    }
 
     @GetMapping("/available")
     public List<HotelRoomResponse> getAllAvailableRooms() {
@@ -91,7 +98,7 @@ public class HotelRoomController {
 
     // (format: yyyy-MM-dd)
     @GetMapping("/available-on-date")
-    @Operation(summary = "Get all rooms available on a specific date")
+    @Operation(summary = "Get all rooms available on a specific date. Reservation Page -> Just to show number")
     public List<HotelRoomResponse> getAvailableRoomsOnDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
@@ -104,7 +111,7 @@ public class HotelRoomController {
 
     // (format: yyyy-MM-dd)
     @GetMapping("/available-between-dates")
-    @Operation(summary = "Get all rooms available between two dates")
+    @Operation(summary = "Get all rooms available between two dates. Reservation Creation page")
     public List<HotelRoomResponse> getAvailableRoomsBetweenDates(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {

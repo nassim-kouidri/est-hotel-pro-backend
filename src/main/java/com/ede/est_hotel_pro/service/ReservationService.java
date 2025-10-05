@@ -35,28 +35,8 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final HotelRoomService hotelRoomService;
 
-    public List<ReservationEntity> findAll() {
-        return reservationRepository.findAll();
-    }
-
-    public List<ReservationEntity> findAllByStatus(ReservationStatus status) {
-        return reservationRepository.findAllByStatus(status);
-    }
-
     public Page<ReservationEntity> findAllReservationsByFilterPageable(ReservationStatus status, PaymentStatus paymentStatus, String companyName, UUID hotelRoomId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        Page<ReservationEntity> reservationsPage = reservationRepository.findAllReservationsByFilterPageable(status, paymentStatus, companyName, startDate, endDate, pageable);
-        if (hotelRoomId != null) {
-            List<ReservationEntity> filteredList = reservationsPage.getContent().stream()
-                    .filter(reservation -> reservation.getHotelRoom().getId().equals(hotelRoomId))
-                    .toList();
-
-            return new PageImpl<>(filteredList, pageable, filteredList.size());
-        }
-        return reservationsPage;
-    }
-
-    public List<ReservationEntity> findAllReservations(Optional<ReservationStatus> status) {
-        return reservationRepository.findAllByStatusOrAll(status.orElse(null));
+        return reservationRepository.findAllReservationsByFilterPageable(status, paymentStatus, companyName, hotelRoomId, startDate, endDate, pageable);
     }
 
     public List<ReservationChartResponse> findAllReservationsForChart() {
@@ -279,13 +259,4 @@ public class ReservationService {
                 .toList();
     }
 
-    /**
-     * Convert an Instant to a LocalDate using the system default time zone.
-     *
-     * @param instant The Instant to convert
-     * @return The LocalDate
-     */
-    private LocalDate instantToLocalDate(Instant instant) {
-        return instant.atZone(ZoneId.systemDefault()).toLocalDate();
-    }
 }

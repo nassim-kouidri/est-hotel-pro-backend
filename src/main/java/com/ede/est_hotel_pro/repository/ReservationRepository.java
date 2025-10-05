@@ -19,19 +19,9 @@ import java.util.UUID;
 @Repository
 public interface ReservationRepository extends JpaRepository<ReservationEntity, UUID> {
 
-    List<ReservationEntity> findAllByEndDateBefore(Instant now);
-
-    List<ReservationEntity> findAllByStartDateAfterAndStatus(Instant startDate, ReservationStatus status);
-
     List<ReservationEntity> findAllByHotelRoom_IdAndStartDateLessThanAndEndDateGreaterThan(UUID roomId, Instant endDate, Instant startDate);
 
-    List<ReservationEntity> findAllByStatus(ReservationStatus status);
-
     List<ReservationEntity> findAllByCompleted(boolean completed);
-
-    @Query("SELECT r FROM ReservationEntity r WHERE :status IS NULL OR r.status = :status")
-    List<ReservationEntity> findAllByStatusOrAll(@Param("status") ReservationStatus status);
-
 
     @Query("""
             SELECT new com.ede.est_hotel_pro.dto.out.ReservationChartResponse(r.id, r.startDate)
@@ -54,6 +44,7 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
             WHERE (:status IS NULL OR r.status = :status)
             AND (:paymentStatus IS NULL OR r.paymentStatus = :paymentStatus)
             AND (:companyName IS NULL OR r.companyName = :companyName)
+            AND (COALESCE(:hotelRoomId, r.hotelRoom.id) = r.hotelRoom.id)
             AND FUNCTION('DATE', r.startDate) <= :endDate
             AND FUNCTION('DATE', r.endDate) >= :startDate
             ORDER BY r.startDate ASC
@@ -62,6 +53,7 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
             @Param("status") ReservationStatus status,
             @Param("paymentStatus") PaymentStatus paymentStatus,
             @Param("companyName") String companyName,
+            @Param("hotelRoomId") UUID hotelRoomId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             Pageable pageable);
